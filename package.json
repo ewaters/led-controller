@@ -1,0 +1,12 @@
+{
+	"name": "led-controller",
+	"description": "An animation controller for strands of LED pixels",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/ewaters/led-controller.git"
+	},
+	"dependencies": {
+		"nodeunit": "*",
+		"lodash": "*"
+	}
+}
