@@ -1,3 +1,8 @@
+var _ = require("lodash");
+
+var RED = 0xff0000,
+	FPS = 10;
+
 var common = {
 	strands: [
 		{
@@ -18,28 +23,41 @@ var common = {
 	],
 };
 
+var redFill = {
+	id: 1,
+	colorspace: "RGB",
+	frames: [
+		{
+			fill: RED
+		},
+	]
+};
+
 exports.basic = function (test) {
-	var RED = 0xff0000;
-
-	var payload = common;
-	payload.animations = [{
-		id: 1,
-		colorspace: "RGB",
-		frames: [
-			{
-				fill: RED
-			},
-		]
-	}];
-
+	var payload = _.cloneDeep(common);
+	payload.animations = [ redFill ];
 	payload.playback = [{
-		animationId: 1,
+		animationId: redFill.id,
 		layoutId: 1,
 	}];
 
-	var expected = [
-		[ RED, RED, RED, RED ]
-	];
+	var frame = [ RED, RED, RED, RED ];
+
+	var animation = new controller.Animation(payload);
+
+	test.deepEqual(
+		animation.renderFrame(1, FPS),
+		frame,
+		"renderFrame(1, _)"
+	);
+
+	test.deepEqual(
+		animation.renderSimple(FPS),
+		[
+			{ display: frame }
+		],
+		"renderSimple(_)"
+	);
 
 	test.done();
 };
