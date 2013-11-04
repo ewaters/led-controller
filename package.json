@@ -7,7 +7,8 @@
 	},
 	"dependencies": {
 		"lodash": "*",
-		"difflet": "*"
+		"difflet": "*",
+		"amanda": "*"
 	},
 	"devDependencies": {
 		"nodeunit": "*"
