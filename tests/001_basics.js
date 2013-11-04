@@ -1,6 +1,10 @@
-var _ = require("lodash");
+var _ = require("lodash"),
+	difflet = require("difflet"),
+	console = require("console"),
+	Animation = require("../lib/animation");
 
 var RED = 0xff0000,
+	GREEN = 0x00ff00,
 	FPS = 10;
 
 var common = {
@@ -23,41 +27,90 @@ var common = {
 	],
 };
 
-var redFill = {
-	id: 1,
-	colorspace: "RGB",
-	frames: [
-		{
-			fill: RED
-		},
-	]
-};
+function dataEqual(test, got, expected, message) {
+	var s = difflet.compare(got, expected);
+	var differs = s !== "";
+	test.ok(! differs, message + "\n" + s);
+}
 
-exports.basic = function (test) {
+exports.basics = function (test) {
 	var payload = _.cloneDeep(common);
+	var redFill = {
+		id: 1,
+		frames: [
+			{
+				fill: RED
+			},
+		]
+	};
+
 	payload.animations = [ redFill ];
 	payload.playback = [{
 		animationId: redFill.id,
 		layoutId: 1,
 	}];
 
-	var frame = [ RED, RED, RED, RED ];
+	(function () {
+		var animation = new Animation(payload);
+		animation.setFPS(FPS);
 
-	var animation = new controller.Animation(payload);
+		var frame = [ RED, RED, RED, RED ];
+		dataEqual(test,
+			animation.renderFrame(1),
+			frame,
+			"solid red renderFrame(1)"
+		);
 
-	test.deepEqual(
-		animation.renderFrame(1, FPS),
-		frame,
-		"renderFrame(1, _)"
-	);
+		dataEqual(test,
+			animation.renderSimple(),
+			[
+				{ display: frame }
+			],
+			"solid red renderSimple()"
+		);
+	})();
 
-	test.deepEqual(
-		animation.renderSimple(FPS),
-		[
-			{ display: frame }
+	payload.animations.push({
+		id: 2,
+		frames: [
+			{ fill: RED, time: 1 },
+			{ fill: GREEN }
 		],
-		"renderSimple(_)"
-	);
+	});
+	payload.playback[0] = {
+		animationId: 2,
+		layoutId: 1,
+		speed: 1,
+	};
 
+	(function () {
+		var animation = new Animation(payload);
+		animation.setFPS(FPS);
+
+		var redFrame = [ RED, RED, RED, RED ],
+			greenFrame = [ GREEN, GREEN, GREEN, GREEN];
+
+		dataEqual(test,
+			animation.renderFrame(1),
+			redFrame,
+			"two frame renderFrame(1)"
+		);
+		dataEqual(test,
+			animation.renderFrame(FPS),
+			greenFrame,
+			"two frame renderFrame(" + FPS + ")"
+		);
+
+		dataEqual(test,
+			animation.renderSimple(),
+			[
+				{ display: redFrame },
+				{ delay: 1.0 },
+				{ display: greenFrame },
+			],
+			"solid red renderSimple()"
+		);
+	})();
+	
 	test.done();
 };

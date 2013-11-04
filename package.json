@@ -6,7 +6,13 @@
 		"url": "http://github.com/ewaters/led-controller.git"
 	},
 	"dependencies": {
-		"nodeunit": "*",
-		"lodash": "*"
+		"lodash": "*",
+		"difflet": "*"
+	},
+	"devDependencies": {
+		"nodeunit": "*"
+	},
+	"scripts": {
+		"test": "nodeunit tests/*.js"
 	}
 }
