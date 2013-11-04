@@ -33,6 +33,11 @@ function dataEqual(test, got, expected, message) {
 	test.ok(! differs, message + "\n" + s);
 }
 
+exports.config = function (test) {
+	test.ok(new Animation() instanceof Error, "Error: invalid config");
+	test.done();
+};
+
 exports.basics = function (test) {
 	var payload = _.cloneDeep(common);
 	var redFill = {
