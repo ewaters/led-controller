@@ -45,6 +45,7 @@ var invalidConfigs = {
 			start: 10,
 			end: 9, // < start
 		});
+		return "strands[1] start must be <= end";
 	},
 	strandRepeatedIndicies: function (bad, good) {
 		bad.strands.push({
@@ -57,6 +58,7 @@ var invalidConfigs = {
 			start: 4,
 			end: 6,
 		});
+		return "strands[1] index 3 overlaps with strand id 1";
 	},
 	strandRepeatedId: function (bad, good) {
 		bad.strands.push({
@@ -69,6 +71,7 @@ var invalidConfigs = {
 			start: 4,
 			end: 5,
 		});
+		return "strands[1] id 1 is not unique";
 	},
 
 	layoutInvalidDimensions: function (bad, good) {
@@ -82,6 +85,7 @@ var invalidConfigs = {
 			dimensions: [ 1, 1, 1 ], // 3D is.
 			pixelIndicies: [ [ [ 0 ] ] ],
 		});
+		return "layouts[1].dimensions must be between 1 and 3 length"
 	},
 	layoutPixelIndiciesDimensionMismatch: function (bad, good) {
 		bad.layouts.push({
@@ -94,6 +98,7 @@ var invalidConfigs = {
 			dimensions: [ 2 ],
 			pixelIndicies: [ 1, 2 ],
 		});
+		return "layouts[1].pixelIndicies.length 3 doesn't match expected 2";
 	},
 	layoutPixelIndiciesMismatch: function (bad, good) {
 		bad.layouts.push({
@@ -101,6 +106,7 @@ var invalidConfigs = {
 			dimensions: [ 2 ],
 			pixelIndicies: [ 3, 4 ], // no such pixel 4
 		});
+		return "layouts[1].pixelIndicies[1] references an unknown pixel id (4)";
 	},
 
 	playbackMismatch: function (bad, good) {
@@ -108,6 +114,7 @@ var invalidConfigs = {
 			animationId: 4,
 			layoutId: 2,
 		});
+		return "playback[1].animationId refers to an id 4 that's not found in animations";
 	},
 };
 
@@ -128,7 +135,7 @@ _.forEach(invalidConfigs, function (f, label) {
 	exports["invalid " + label] = function (test) {
 		var good = _.cloneDeep(baseConfig),
 			bad  = _.cloneDeep(baseConfig);
-		f(bad, good);
+		var expectedMessage = f(bad, good);
 
 		var badResult = new Animation(bad),
 			goodResult = new Animation(good);
@@ -136,9 +143,16 @@ _.forEach(invalidConfigs, function (f, label) {
 		if (goodResult instanceof Error) {
 			console.info(goodResult.message);
 		}
+		if (expectedMessage === undefined && badResult instanceof Error) {
+			var matches = badResult.message.match(/^Invalid config: (.+)$/);
+			console.info("Consider adding the following to " + label + " test func:\nreturn \"" + matches[1] + "\";");
+		}
 
 		test.ok(badResult instanceof Error, "bad result is an error");
 		test.ok(goodResult instanceof Animation, "good result is not an error");
+		if (expectedMessage !== undefined) {
+			test.equal(badResult.message, "Invalid config: " + expectedMessage);
+		}
 		test.done();
 	};
 });
