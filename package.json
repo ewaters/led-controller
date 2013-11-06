@@ -8,7 +8,7 @@
 	"dependencies": {
 		"lodash": "*",
 		"difflet": "*",
-		"amanda": "*"
+		"tv4": "*"
 	},
 	"devDependencies": {
 		"nodeunit": "*"

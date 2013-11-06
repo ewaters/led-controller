@@ -27,7 +27,7 @@ var baseConfig = {
 			id: 1,
 			frames: [
 				{
-					fill: RED
+					fill: RED,
 				},
 			]
 		},
@@ -116,6 +116,12 @@ var invalidConfigs = {
 		});
 		return "playback[1].animationId refers to an id 4 that's not found in animations";
 	},
+
+	frameInvalid: function (bad, good) {
+		bad.animations[0].frames.push({
+			iAmAnInvalidFrame: true
+		});
+	},
 };
 
 var validConfigs = {
@@ -145,7 +151,12 @@ _.forEach(invalidConfigs, function (f, label) {
 		}
 		if (expectedMessage === undefined && badResult instanceof Error) {
 			var matches = badResult.message.match(/^Invalid config: (.+)$/);
-			console.info("Consider adding the following to " + label + " test func:\nreturn \"" + matches[1] + "\";");
+			if (matches !== null) {
+				console.info("Consider adding the following to " + label + " test func:\nreturn \"" + matches[1] + "\";");
+			}
+			else {
+				console.info(badResult.message);
+			}
 		}
 
 		test.ok(badResult instanceof Error, "bad result is an error");
