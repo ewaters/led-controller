@@ -4,8 +4,7 @@ var _ = require("lodash"),
 	Animation = require("../lib/animation");
 
 var RED = 0xff0000,
-	GREEN = 0x00ff00,
-	FPS = 10;
+	GREEN = 0x00ff00;
 
 var common = {
 	strands: [
@@ -25,97 +24,87 @@ var common = {
 			],
 		},
 	],
+	animations: [
+		{
+			id: 1,
+			frames: [],
+		},
+	],
+	playback: [
+		{
+			animationId: 1,
+			layoutId: 1,
+		},
+	],
 };
 
 function dataEqual(test, got, expected, message) {
-	var s = difflet.compare(got, expected);
-	var differs = s !== "";
-	test.ok(! differs, message + "\n" + s);
+	var differs = JSON.stringify(got) != JSON.stringify(expected);
+	if (differs)
+		console.info(test + " difflet: " + difflet.compare(got, expected));
+	test.ok(! differs, message);
 }
 
-exports.config = function (test) {
-	test.ok(new Animation() instanceof Error, "Error: invalid config");
+exports.oneFrame = function (test) {
+	test.expect(2);
+
+	var payload = _.cloneDeep(common);
+	payload.animations[0].frames = [
+		{
+			fill: RED
+		},
+	];
+
+	var animation = new Animation(payload);
+	if (animation instanceof Error) {
+		console.info(animation.message);
+		return;
+	}
+
+	dataEqual(test,
+		animation.render(),
+		{ 1: [ RED, RED, RED, RED ] },
+		"First call to render returns all red"
+	);
+	dataEqual(test,
+		animation.render(),
+		null,
+		"Second call to render returns null"
+	);
+
 	test.done();
 };
 
-exports.basics = function (test) {
+exports.twoFrame = function (test) {
+	test.expect(3);
+
 	var payload = _.cloneDeep(common);
-	var redFill = {
-		id: 1,
-		frames: [
-			{
-				fill: RED
-			},
-		]
-	};
+	payload.animations[0].frames = [
+		{ fill: RED, },
+		{ fill: GREEN }
+	];
 
-	payload.animations = [ redFill ];
-	payload.playback = [{
-		animationId: redFill.id,
-		layoutId: 1,
-	}];
+	var animation = new Animation(payload);
+	if (animation instanceof Error) {
+		console.info(animation.message);
+		return;
+	}
 
-	(function () {
-		var animation = new Animation(payload);
-		animation.setFPS(FPS);
+	dataEqual(test,
+		animation.render(),
+		{ 1: [ RED, RED, RED, RED ] },
+		"First call to two frame render returns all red"
+	);
+	dataEqual(test,
+		animation.render(),
+		{ 1: [ GREEN, GREEN, GREEN, GREEN ] },
+		"Second call to two frame render returns all green"
+	);
+	dataEqual(test,
+		animation.render(),
+		null,
+		"Third call to two frame render returns null"
+	);
 
-		var frame = [ RED, RED, RED, RED ];
-		dataEqual(test,
-			animation.renderFrame(1),
-			frame,
-			"solid red renderFrame(1)"
-		);
-
-		dataEqual(test,
-			animation.renderSimple(),
-			[
-				{ display: frame }
-			],
-			"solid red renderSimple()"
-		);
-	})();
-
-	payload.animations.push({
-		id: 2,
-		frames: [
-			{ fill: RED, time: 1 },
-			{ fill: GREEN }
-		],
-	});
-	payload.playback[0] = {
-		animationId: 2,
-		layoutId: 1,
-		speed: 1,
-	};
-
-	(function () {
-		var animation = new Animation(payload);
-		animation.setFPS(FPS);
-
-		var redFrame = [ RED, RED, RED, RED ],
-			greenFrame = [ GREEN, GREEN, GREEN, GREEN];
-
-		dataEqual(test,
-			animation.renderFrame(1),
-			redFrame,
-			"two frame renderFrame(1)"
-		);
-		dataEqual(test,
-			animation.renderFrame(FPS),
-			greenFrame,
-			"two frame renderFrame(" + FPS + ")"
-		);
-
-		dataEqual(test,
-			animation.renderSimple(),
-			[
-				{ display: redFrame },
-				{ delay: 1.0 },
-				{ display: greenFrame },
-			],
-			"solid red renderSimple()"
-		);
-	})();
-	
 	test.done();
 };
