@@ -17,6 +17,6 @@
 		"jshint": "*"
 	},
 	"scripts": {
-		"test": "nodeunit tests/*.js"
+		"test": "nodeunit tests/0*.js"
 	}
 }
