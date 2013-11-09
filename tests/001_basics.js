@@ -198,6 +198,29 @@ exports.timingSkip = function (test) {
 };
 
 exports.speed = function (test) {
+	test.expect(3);
+
+	var payload = _.cloneDeep(common);
+	payload.animations[0].frames = [
+		{ fill: RED, time: 1 },
+		{ fill: GREEN, time: 1 },
+		{ fill: BLUE, time: 1 },
+	];
+	payload.playback[0].speed = 2;
+
+	var animation = new Animation(payload);
+	if (animation instanceof Error) {
+		console.info(animation.message);
+		return;
+	}
+	var timer = installTestTimer(animation);
+
+	dataEqual(test, animation.render(), all(RED));
+	timer.elapsed = 0.5;
+	dataEqual(test, animation.render(), all(GREEN));
+	timer.elapsed = 1;
+	dataEqual(test, animation.render(), all(BLUE));
+
 	test.done();
 };
 
