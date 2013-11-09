@@ -1,6 +1,13 @@
 var _ = require("lodash"),
 	Color = require("../lib/color");
 
+exports.invalid = function (test) {
+	test.ok(new Color('RGB', "notacolor") instanceof Error);
+	test.ok(new Color('RGB', -10) instanceof Error);
+	test.ok(new Color('RGB', 0xffffffff) instanceof Error);
+	test.done();
+};
+
 exports.red = function (test) {
 	var color = new Color('RGB', 0xff0000);
 	test.equal(color.red(), 1, "RGB red()");

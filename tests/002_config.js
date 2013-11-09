@@ -108,6 +108,30 @@ var invalidConfigs = {
 		});
 		return "layouts[1].pixelIndicies[1] references an unknown pixel id (4)";
 	},
+	layoutPixelIndiciesString: function (bad, good) {
+		bad.layouts.push({
+			id: 2,
+			dimensions: [ 2 ],
+			pixelIndicies: [ "not", "number" ],
+		});
+		return "layouts[1].pixelIndicies[0] is not a number ('not')";
+	},
+	layoutPixelIndiciesRepeated: function (bad, good) {
+		bad.layouts.push({
+			id: 2,
+			dimensions: [ 2 ],
+			pixelIndicies: [ 1, 1 ],
+		});
+		return "layouts[1].pixelIndicies[1] references an already seen pixel id (1)";
+	},
+	layoutPixelIndiciesNotArray: function (bad, good) {
+		bad.layouts.push({
+			id: 2,
+			dimensions: [ 2, 2 ],
+			pixelIndicies: [ {}, {} ],
+		});
+		return "layouts[1].pixelIndicies[0] is not an array";
+	},
 
 	playbackMismatch: function (bad, good) {
 		bad.playback.push({
@@ -117,10 +141,18 @@ var invalidConfigs = {
 		return "playback[1].animationId refers to an id 4 that's not found in animations";
 	},
 
-	frameInvalid: function (bad, good) {
+	frameFields: function (bad, good) {
 		bad.animations[0].frames.push({
 			iAmAnInvalidFrame: true
 		});
+		return "Data does not match any schemas from \"oneOf\" (/properties/animations/items/properties/frames/items/oneOf)";
+	},
+	frameTransitionPrevNext: function (bad, good) {
+		bad.animations[0].frames = [{
+			dissolve: true,
+			time: 5,
+		}];
+		return "Failed to compile animationsById[1].frames[0]: can't be a transition without a frame before and after";
 	},
 };
 
@@ -134,6 +166,25 @@ var validConfigs = {
 				[ 2, null ],
 			],
 		});
+	},
+};
+
+var configsWithDefaults = {
+	animation: function (config) {
+		return function (test, obj) {
+			var animation = obj.config.animationsById[1];
+			test.equal(animation.colorspace, "RGB");
+		};
+	},
+	layoutNullPixelIndicies: function (config) {
+		config.layouts.push({
+			id: 2,
+			dimensions: [ 2, 2 ],
+		});
+		return function (test, animation) {
+			var layout = animation.config.layoutsById[2];
+			test.deepEqual([[ 0, 1 ], [ 2, 3 ]], layout.pixelIndicies);
+		};
 	},
 };
 
@@ -177,6 +228,20 @@ _.forEach(validConfigs, function (f, label) {
 			console.info(goodResult.message);
 		}
 		test.ok(goodResult instanceof Animation, "good result is not an error");
+		test.done();
+	};
+});
+
+_.forEach(configsWithDefaults, function (f, label) {
+	exports["default test " + label] = function (test) {
+		var config = _.cloneDeep(baseConfig);
+		var tester = f(config);
+		var animation = new Animation(config);
+		if (animation instanceof Error) {
+			console.info(animation.message);
+		}
+		test.ok(animation instanceof Animation, "animation is not an error");
+		tester(test, animation);
 		test.done();
 	};
 });

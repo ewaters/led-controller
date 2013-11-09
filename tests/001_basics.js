@@ -225,3 +225,77 @@ exports.transition = function (test) {
 
 	test.done();
 };
+
+exports.repeatForever = function (test) {
+	test.expect(5);
+
+	var payload = _.cloneDeep(common);
+	payload.animations[0].frames = [
+		{ fill: RED },
+		{ fill: GREEN },
+	];
+	payload.playback[0].repeat = -1;
+
+	var animation = new Animation(payload);
+	if (animation instanceof Error) {
+		console.info(animation.message);
+		return;
+	}
+
+	dataEqual(test, animation.render(), all(RED));
+	dataEqual(test, animation.render(), all(GREEN));
+	dataEqual(test, animation.render(), all(RED));
+	dataEqual(test, animation.render(), all(GREEN));
+	dataEqual(test, animation.render(), all(RED));
+
+	test.done();
+};
+
+exports.repeatCount = function (test) {
+	test.expect(5);
+
+	var payload = _.cloneDeep(common);
+	payload.animations[0].frames = [
+		{ fill: RED },
+		{ fill: GREEN },
+	];
+	payload.playback[0].repeat = 1;
+
+	var animation = new Animation(payload);
+	if (animation instanceof Error) {
+		console.info(animation.message);
+		return;
+	}
+
+	dataEqual(test, animation.render(), all(RED));
+	dataEqual(test, animation.render(), all(GREEN));
+	dataEqual(test, animation.render(), all(RED));
+	dataEqual(test, animation.render(), all(GREEN));
+	dataEqual(test, animation.render(), null);
+
+	test.done();
+};
+
+exports.selection = function (test) {
+	test.expect(1);
+
+	var payload = _.cloneDeep(common);
+	payload.animations[0].frames = [
+		{ fill: RED, },
+	];
+	payload.selections = [{
+		id: 1,
+		criteria: "c.pixelIndex % 2 == 0",
+	}];
+	payload.playback[0].selectionId = 1;
+
+	var animation = new Animation(payload);
+	if (animation instanceof Error) {
+		console.info(animation.message);
+		return;
+	}
+
+	dataEqual(test, animation.render(), { 1: [ RED, null, RED, null ] });
+
+	test.done();
+};
