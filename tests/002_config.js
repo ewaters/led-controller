@@ -1,5 +1,5 @@
 var _ = require("lodash"),
-	console = require("console"),
+	async = require("async"),
 	Animation = require("../lib/animation");
 
 var RED = 0xff0000;
@@ -204,32 +204,43 @@ var configsWithDefaults = {
 
 _.forEach(invalidConfigs, function (f, label) {
 	exports["invalid " + label] = function (test) {
-		var good = _.cloneDeep(baseConfig),
-			bad  = _.cloneDeep(baseConfig);
-		var expectedMessage = f(bad, good);
+		var goodConfig = _.cloneDeep(baseConfig),
+			badConfig  = _.cloneDeep(baseConfig);
+		var expectedMessage = f(badConfig, goodConfig);
 
-		var badResult = new Animation(bad),
-			goodResult = new Animation(good);
+		async.parallel([
+			function (cb) {
+				var animation = new Animation(badConfig);
+				animation.compile(function (err) {
+					if (expectedMessage === undefined && err !== null) {
+						var matches = err.match(/^Invalid config: (.+)$/);
+						if (matches !== null) {
+							console.info("Consider adding the following to " + label + " test func:\nreturn \"" + matches[1] + "\";");
+						}
+						else {
+							console.info(err);
+						}
+					}
 
-		if (goodResult instanceof Error) {
-			console.info(goodResult.message);
-		}
-		if (expectedMessage === undefined && badResult instanceof Error) {
-			var matches = badResult.message.match(/^Invalid config: (.+)$/);
-			if (matches !== null) {
-				console.info("Consider adding the following to " + label + " test func:\nreturn \"" + matches[1] + "\";");
-			}
-			else {
-				console.info(badResult.message);
-			}
-		}
-
-		test.ok(badResult instanceof Error, "bad result is an error");
-		test.ok(goodResult instanceof Animation, "good result is not an error");
-		if (expectedMessage !== undefined) {
-			test.equal(badResult.message, "Invalid config: " + expectedMessage);
-		}
-		test.done();
+					test.ok(err !== null, "Bad config yielded an error");
+					if (expectedMessage !== undefined)
+						test.equal(err, "Invalid config: " + expectedMessage);
+					return cb();
+				});
+			},
+			function (cb) {
+				var animation = new Animation(goodConfig);
+				animation.compile(function (err) {
+					if (err !== null) {
+						console.info(err);
+					}
+					test.ok(err === null, "Good config yielded no error");
+					return cb();
+				});
+			},
+		], function () {
+			test.done();
+		});
 	};
 });
 
@@ -237,12 +248,11 @@ _.forEach(validConfigs, function (f, label) {
 	exports["valid " + label] = function (test) {
 		var good = _.cloneDeep(baseConfig);
 		f(good);
-		var goodResult = new Animation(good);
-		if (goodResult instanceof Error) {
-			console.info(goodResult.message);
-		}
-		test.ok(goodResult instanceof Animation, "good result is not an error");
-		test.done();
+		var animation = new Animation(good);
+		animation.compile(function (err) {
+			test.equal(err, null);
+			test.done();
+		});
 	};
 });
 
@@ -251,11 +261,10 @@ _.forEach(configsWithDefaults, function (f, label) {
 		var config = _.cloneDeep(baseConfig);
 		var tester = f(config);
 		var animation = new Animation(config);
-		if (animation instanceof Error) {
-			console.info(animation.message);
-		}
-		test.ok(animation instanceof Animation, "animation is not an error");
-		tester(test, animation);
-		test.done();
+		animation.compile(function (err) {
+			test.equal(err, null);
+			tester(test, animation);
+			test.done();
+		});
 	};
 });

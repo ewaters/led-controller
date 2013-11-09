@@ -10,6 +10,7 @@
 		"difflet": "*",
 		"tv4": "*",
 		"onecolor": "git://github.com/One-com/one-color.git",
+		"async": "*",
 		"exprjs": "*"
 	},
 	"devDependencies": {

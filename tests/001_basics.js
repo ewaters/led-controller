@@ -73,6 +73,17 @@ function dataEqual(test, got, expected, message) {
 	test.ok(! differs, message);
 }
 
+function testValidConfig(config, cb) {
+	var animation = new Animation(config);
+	animation.compile(function (err) {
+		if (err !== null) {
+			console.info(err);
+			return;
+		}
+		cb(animation, installTestTimer(animation));
+	});
+}
+
 exports.oneFrame = function (test) {
 	test.expect(2);
 
@@ -83,24 +94,19 @@ exports.oneFrame = function (test) {
 		},
 	];
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
-
-	dataEqual(test,
-		animation.render(),
-		all(RED),
-		"First call to render returns all red"
-	);
-	dataEqual(test,
-		animation.render(),
-		null,
-		"Second call to render returns null"
-	);
-
-	test.done();
+	testValidConfig(payload, function (animation) {
+		dataEqual(test,
+			animation.render(),
+			all(RED),
+			"First call to render returns all red"
+		);
+		dataEqual(test,
+			animation.render(),
+			null,
+			"Second call to render returns null"
+		);
+		test.done();
+	});
 };
 
 exports.twoFrame = function (test) {
@@ -112,29 +118,25 @@ exports.twoFrame = function (test) {
 		{ fill: GREEN }
 	];
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
+	testValidConfig(payload, function (animation) {
+		dataEqual(test,
+			animation.render(),
+			all(RED),
+			"First call to two frame render returns all red"
+		);
+		dataEqual(test,
+			animation.render(),
+			all(GREEN),
+			"Second call to two frame render returns all green"
+		);
+		dataEqual(test,
+			animation.render(),
+			null,
+			"Third call to two frame render returns null"
+		);
 
-	dataEqual(test,
-		animation.render(),
-		all(RED),
-		"First call to two frame render returns all red"
-	);
-	dataEqual(test,
-		animation.render(),
-		all(GREEN),
-		"Second call to two frame render returns all green"
-	);
-	dataEqual(test,
-		animation.render(),
-		null,
-		"Third call to two frame render returns null"
-	);
-
-	test.done();
+		test.done();
+	});
 };
 
 exports.timing = function (test) {
@@ -146,28 +148,23 @@ exports.timing = function (test) {
 		{ fill: GREEN, time: 1 },
 	];
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
-	var timer = installTestTimer(animation);
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), all(RED));
 
-	dataEqual(test, animation.render(), all(RED));
+		timer.elapsed = 0.5;
+		dataEqual(test, animation.render(), all(RED));
 
-	timer.elapsed = 0.5;
-	dataEqual(test, animation.render(), all(RED));
+		timer.elapsed = 1;
+		dataEqual(test, animation.render(), all(GREEN));
 
-	timer.elapsed = 1;
-	dataEqual(test, animation.render(), all(GREEN));
+		timer.elapsed = 1.9;
+		dataEqual(test, animation.render(), all(GREEN));
 
-	timer.elapsed = 1.9;
-	dataEqual(test, animation.render(), all(GREEN));
+		timer.elapsed = 2;
+		dataEqual(test, animation.render(), null);
 
-	timer.elapsed = 2;
-	dataEqual(test, animation.render(), null);
-
-	test.done();
+		test.done();
+	});
 };
 
 exports.timingSkip = function (test) {
@@ -180,22 +177,17 @@ exports.timingSkip = function (test) {
 		{ fill: BLUE, time: 1 },
 	];
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
-	var timer = installTestTimer(animation);
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), all(RED));
 
-	dataEqual(test, animation.render(), all(RED));
+		timer.elapsed = 2.1;
+		dataEqual(test, animation.render(), all(BLUE));
 
-	timer.elapsed = 2.1;
-	dataEqual(test, animation.render(), all(BLUE));
+		timer.elapsed = 4;
+		dataEqual(test, animation.render(), null);
 
-	timer.elapsed = 4;
-	dataEqual(test, animation.render(), null);
-
-	test.done();
+		test.done();
+	});
 };
 
 exports.speed = function (test) {
@@ -209,20 +201,15 @@ exports.speed = function (test) {
 	];
 	payload.playback[0].speed = 2;
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
-	var timer = installTestTimer(animation);
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), all(RED));
+		timer.elapsed = 0.5;
+		dataEqual(test, animation.render(), all(GREEN));
+		timer.elapsed = 1;
+		dataEqual(test, animation.render(), all(BLUE));
 
-	dataEqual(test, animation.render(), all(RED));
-	timer.elapsed = 0.5;
-	dataEqual(test, animation.render(), all(GREEN));
-	timer.elapsed = 1;
-	dataEqual(test, animation.render(), all(BLUE));
-
-	test.done();
+		test.done();
+	});
 };
 
 exports.transition = function (test) {
@@ -235,23 +222,17 @@ exports.transition = function (test) {
 		{ fill: BLUE, time: 1 },
 	];
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
-	var timer = installTestTimer(animation);
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), all(RED));
+		timer.elapsed = 1.5;
+		// http://meyerweb.com/eric/tools/color-blend/
+		dataEqual(test, animation.render(), all(0x800080));
 
-	dataEqual(test, animation.render(), all(RED));
+		timer.elapsed = 2.1;
+		dataEqual(test, animation.render(), all(BLUE));
 
-	timer.elapsed = 1.5;
-	// http://meyerweb.com/eric/tools/color-blend/
-	dataEqual(test, animation.render(), all(0x800080));
-
-	timer.elapsed = 2.1;
-	dataEqual(test, animation.render(), all(BLUE));
-
-	test.done();
+		test.done();
+	});
 };
 
 exports.repeatForever = function (test) {
@@ -264,19 +245,15 @@ exports.repeatForever = function (test) {
 	];
 	payload.playback[0].repeat = -1;
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), all(RED));
+		dataEqual(test, animation.render(), all(GREEN));
+		dataEqual(test, animation.render(), all(RED));
+		dataEqual(test, animation.render(), all(GREEN));
+		dataEqual(test, animation.render(), all(RED));
 
-	dataEqual(test, animation.render(), all(RED));
-	dataEqual(test, animation.render(), all(GREEN));
-	dataEqual(test, animation.render(), all(RED));
-	dataEqual(test, animation.render(), all(GREEN));
-	dataEqual(test, animation.render(), all(RED));
-
-	test.done();
+		test.done();
+	});
 };
 
 exports.repeatCount = function (test) {
@@ -289,19 +266,15 @@ exports.repeatCount = function (test) {
 	];
 	payload.playback[0].repeat = 1;
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), all(RED));
+		dataEqual(test, animation.render(), all(GREEN));
+		dataEqual(test, animation.render(), all(RED));
+		dataEqual(test, animation.render(), all(GREEN));
+		dataEqual(test, animation.render(), null);
 
-	dataEqual(test, animation.render(), all(RED));
-	dataEqual(test, animation.render(), all(GREEN));
-	dataEqual(test, animation.render(), all(RED));
-	dataEqual(test, animation.render(), all(GREEN));
-	dataEqual(test, animation.render(), null);
-
-	test.done();
+		test.done();
+	});
 };
 
 exports.selection = function (test) {
@@ -317,15 +290,10 @@ exports.selection = function (test) {
 	}];
 	payload.playback[0].selectionId = 1;
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
-
-	dataEqual(test, animation.render(), { 1: [ RED, null, RED, null ] });
-
-	test.done();
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), { 1: [ RED, null, RED, null ] });
+		test.done();
+	});
 };
 
 exports.concurrentPlayback = function (test) {
@@ -360,15 +328,10 @@ exports.concurrentPlayback = function (test) {
 		repeat: -1,
 	});
 
-	var animation = new Animation(payload);
-	if (animation instanceof Error) {
-		console.info(animation.message);
-		return;
-	}
-
-	dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
-	dataEqual(test, animation.render(), { 1: [ BLUE, RED, BLUE, RED ] });
-	dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
-
-	test.done();
+	testValidConfig(payload, function (animation, timer) {
+		dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
+		dataEqual(test, animation.render(), { 1: [ BLUE, RED, BLUE, RED ] });
+		dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
+		test.done();
+	});
 };
