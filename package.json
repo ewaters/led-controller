@@ -9,7 +9,8 @@
 		"lodash": "*",
 		"difflet": "*",
 		"tv4": "*",
-		"onecolor": "git://github.com/One-com/one-color.git"
+		"onecolor": "git://github.com/One-com/one-color.git",
+		"exprjs": "*"
 	},
 	"devDependencies": {
 		"nodeunit": "*",

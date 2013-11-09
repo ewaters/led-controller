@@ -197,6 +197,10 @@ exports.timingSkip = function (test) {
 	test.done();
 };
 
+exports.speed = function (test) {
+	test.done();
+};
+
 exports.transition = function (test) {
 	test.expect(3);
 
@@ -285,7 +289,7 @@ exports.selection = function (test) {
 	];
 	payload.selections = [{
 		id: 1,
-		criteria: "c.pixelIndex % 2 == 0",
+		criteria: "pixelIndex % 2 == 0",
 	}];
 	payload.playback[0].selectionId = 1;
 
