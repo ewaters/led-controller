@@ -86,7 +86,7 @@ var invalidConfigs = {
 			dimensions: [ 1, 1, 1 ], // 3D is.
 			pixelIndicies: [ [ [ 0 ] ] ],
 		});
-		return "layouts[1].dimensions must be between 1 and 3 length"
+		return "layouts[1].dimensions must be between 1 and 3 length";
 	},
 	layoutPixelIndiciesDimensionMismatch: function (bad, good) {
 		bad.layouts.push({
