@@ -33,6 +33,7 @@ var baseConfig = {
 		},
 	],
 	playback: [{
+		id: 1,
 		animationId: 1,
 		layoutId: 1,
 	}],
@@ -133,8 +134,21 @@ var invalidConfigs = {
 		return "layouts[1].pixelIndicies[0] is not an array";
 	},
 
+	playbackMissingId: function (bad, good) {
+		bad.playback.push({
+			animationId: 1,
+			layoutId: 1,
+		});
+		good.playback.push({
+			id: 2,
+			animationId: 1,
+			layoutId: 1,
+		});
+		return "Missing required property: id (/properties/playback/items/required/0)";
+	},
 	playbackMismatch: function (bad, good) {
 		bad.playback.push({
+			id: 2,
 			animationId: 4,
 			layoutId: 2,
 		});

@@ -33,6 +33,7 @@ var common = {
 	],
 	playback: [
 		{
+			id: 1,
 			animationId: 1,
 			layoutId: 1,
 		},
@@ -323,6 +324,51 @@ exports.selection = function (test) {
 	}
 
 	dataEqual(test, animation.render(), { 1: [ RED, null, RED, null ] });
+
+	test.done();
+};
+
+exports.concurrentPlayback = function (test) {
+	test.expect(3);
+
+	var payload = _.cloneDeep(common);
+
+	// Fill with red and repeat forever.
+	payload.animations[0].frames = [
+		{ fill: RED, },
+	];
+	payload.playback[0].repeat = -1;
+	payload.playback[0].concurrentWithNext = true;
+
+	// Make every other alternating green and blue.
+	payload.animations.push({
+		id: 2,
+		frames: [
+			{ fill: GREEN },
+			{ fill: BLUE },
+		],
+	});
+	payload.selections = [{
+		id: 1,
+		criteria: "pixelIndex % 2 == 0",
+	}];
+	payload.playback.push({
+		id: 2,
+		animationId: 2,
+		layoutId: 1,
+		selectionId: 1,
+		repeat: -1,
+	});
+
+	var animation = new Animation(payload);
+	if (animation instanceof Error) {
+		console.info(animation.message);
+		return;
+	}
+
+	dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
+	dataEqual(test, animation.render(), { 1: [ BLUE, RED, BLUE, RED ] });
+	dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
 
 	test.done();
 };
