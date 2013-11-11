@@ -58,7 +58,6 @@ _.forEach(tests, function (criteriaFunc, label) {
 		var config = _.cloneDeep(baseConfig);
 		if (criteria.frame)
 			config.animations[0].frames.push(criteria.frame);
-		console.info(config);
 
 		var animation = new Animation(config);
 		animation.compile(function (err) {

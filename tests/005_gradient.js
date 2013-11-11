@@ -6,7 +6,7 @@ var WHITE = new Color("RGB", 0xffffff),
 	BLACK = new Color("RGB", 0x000000);
 
 exports.simple = function (test) {
-	test.expect(2);
+	test.expect(4);
 	var gradient = new Gradient({
 		size: [ 1, 5 ],
 		colors: [
@@ -30,6 +30,11 @@ exports.simple = function (test) {
 		]
 	);
 
+	var expected = {
+		'0,0': WHITE,
+		'0,4': BLACK,
+	};
+
 	gradient.render(function (err, result) {
 		test.equal(err, null);
 		if (err !== null) {
@@ -37,8 +42,8 @@ exports.simple = function (test) {
 			return;
 		}
 
-		_.forEach(result, function (val, key) {
-			console.info(key + " has color " + val.hex());
+		_.forEach(expected, function (val, key) {
+			test.equal(val.hex(), result[key].hex());
 		});
 
 		test.done();
