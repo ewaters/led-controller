@@ -84,6 +84,25 @@ function testValidConfig(config, cb) {
 	});
 }
 
+function testRenders(test, config, spec, cb) {
+	testValidConfig(config, function (animation, timer) {
+		_.forEach(spec, function (item) {
+			if (item.time !== undefined) timer.elapsed = item.time;
+			dataEqual(test,
+				animation.render(),
+				item.expect,
+				item.msg
+			);
+		});
+		if (cb !== undefined) {
+			cb();
+		}
+		else {
+			test.done();
+		}
+	});
+}
+
 exports.oneFrame = function (test) {
 	test.expect(2);
 
@@ -94,19 +113,10 @@ exports.oneFrame = function (test) {
 		},
 	];
 
-	testValidConfig(payload, function (animation) {
-		dataEqual(test,
-			animation.render(),
-			all(RED),
-			"First call to render returns all red"
-		);
-		dataEqual(test,
-			animation.render(),
-			null,
-			"Second call to render returns null"
-		);
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED), msg: "First call to render returns all red" },
+		{ expect: null, msg: "Second call to render returns null" },
+	]);
 };
 
 exports.twoFrame = function (test) {
@@ -118,25 +128,11 @@ exports.twoFrame = function (test) {
 		{ fill: GREEN }
 	];
 
-	testValidConfig(payload, function (animation) {
-		dataEqual(test,
-			animation.render(),
-			all(RED),
-			"First call to two frame render returns all red"
-		);
-		dataEqual(test,
-			animation.render(),
-			all(GREEN),
-			"Second call to two frame render returns all green"
-		);
-		dataEqual(test,
-			animation.render(),
-			null,
-			"Third call to two frame render returns null"
-		);
-
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED), msg: "First call to two frame render returns all red" },
+		{ expect: all(GREEN), msg: "Second call to two frame render returns all green" },
+		{ expect: null, msg: "Third call to two frame render returns null" },
+	]);
 };
 
 exports.timing = function (test) {
@@ -148,23 +144,13 @@ exports.timing = function (test) {
 		{ fill: GREEN, time: 1 },
 	];
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), all(RED));
-
-		timer.elapsed = 0.5;
-		dataEqual(test, animation.render(), all(RED));
-
-		timer.elapsed = 1;
-		dataEqual(test, animation.render(), all(GREEN));
-
-		timer.elapsed = 1.9;
-		dataEqual(test, animation.render(), all(GREEN));
-
-		timer.elapsed = 2;
-		dataEqual(test, animation.render(), null);
-
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED) },
+		{ time: 0.5, expect: all(RED) },
+		{ time: 1, expect: all(GREEN) },
+		{ time: 1.9, expect: all(GREEN) },
+		{ time: 2, expect: null },
+	]);
 };
 
 exports.timingSkip = function (test) {
@@ -177,17 +163,11 @@ exports.timingSkip = function (test) {
 		{ fill: BLUE, time: 1 },
 	];
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), all(RED));
-
-		timer.elapsed = 2.1;
-		dataEqual(test, animation.render(), all(BLUE));
-
-		timer.elapsed = 4;
-		dataEqual(test, animation.render(), null);
-
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED) },
+		{ time: 2.1, expect: all(BLUE) },
+		{ time: 4, expect: null },
+	]);
 };
 
 exports.speed = function (test) {
@@ -201,15 +181,11 @@ exports.speed = function (test) {
 	];
 	payload.playback[0].speed = 2;
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), all(RED));
-		timer.elapsed = 0.5;
-		dataEqual(test, animation.render(), all(GREEN));
-		timer.elapsed = 1;
-		dataEqual(test, animation.render(), all(BLUE));
-
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED) },
+		{ time: 0.5, expect: all(GREEN) },
+		{ time: 1, expect: all(BLUE) },
+	]);
 };
 
 exports.transition = function (test) {
@@ -222,17 +198,11 @@ exports.transition = function (test) {
 		{ fill: BLUE, time: 1 },
 	];
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), all(RED));
-		timer.elapsed = 1.5;
-		// http://meyerweb.com/eric/tools/color-blend/
-		dataEqual(test, animation.render(), all(0x800080));
-
-		timer.elapsed = 2.1;
-		dataEqual(test, animation.render(), all(BLUE));
-
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED) },
+		{ time: 1.5, expect: all(0x800080) }, // http://meyerweb.com/eric/tools/color-blend/
+		{ time: 2.1, expect: all(BLUE) },
+	]);
 };
 
 exports.repeatForever = function (test) {
@@ -245,15 +215,13 @@ exports.repeatForever = function (test) {
 	];
 	payload.playback[0].repeat = -1;
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), all(RED));
-		dataEqual(test, animation.render(), all(GREEN));
-		dataEqual(test, animation.render(), all(RED));
-		dataEqual(test, animation.render(), all(GREEN));
-		dataEqual(test, animation.render(), all(RED));
-
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED) },
+		{ expect: all(GREEN) },
+		{ expect: all(RED) },
+		{ expect: all(GREEN) },
+		{ expect: all(RED) },
+	]);
 };
 
 exports.repeatCount = function (test) {
@@ -266,15 +234,13 @@ exports.repeatCount = function (test) {
 	];
 	payload.playback[0].repeat = 1;
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), all(RED));
-		dataEqual(test, animation.render(), all(GREEN));
-		dataEqual(test, animation.render(), all(RED));
-		dataEqual(test, animation.render(), all(GREEN));
-		dataEqual(test, animation.render(), null);
-
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: all(RED) },
+		{ expect: all(GREEN) },
+		{ expect: all(RED) },
+		{ expect: all(GREEN) },
+		{ expect: null },
+	]);
 };
 
 exports.selection = function (test) {
@@ -290,10 +256,9 @@ exports.selection = function (test) {
 	}];
 	payload.playback[0].selectionId = 1;
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), { 1: [ RED, null, RED, null ] });
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: { 1: [ RED, null, RED, null ] } },
+	]);
 };
 
 exports.concurrentPlayback = function (test) {
@@ -328,10 +293,9 @@ exports.concurrentPlayback = function (test) {
 		repeat: -1,
 	});
 
-	testValidConfig(payload, function (animation, timer) {
-		dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
-		dataEqual(test, animation.render(), { 1: [ BLUE, RED, BLUE, RED ] });
-		dataEqual(test, animation.render(), { 1: [ GREEN, RED, GREEN, RED ] });
-		test.done();
-	});
+	testRenders(test, payload, [
+		{ expect: { 1: [ GREEN, RED, GREEN, RED ] } },
+		{ expect: { 1: [ BLUE, RED, BLUE, RED ] } },
+		{ expect: { 1: [ GREEN, RED, GREEN, RED ] } },
+	]);
 };
