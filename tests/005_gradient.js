@@ -6,6 +6,7 @@ var WHITE = new Color("RGB", 0xffffff),
 	BLACK = new Color("RGB", 0x000000);
 
 exports.simple = function (test) {
+	test.expect(2);
 	var gradient = new Gradient({
 		size: [ 1, 5 ],
 		colors: [
