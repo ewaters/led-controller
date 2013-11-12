@@ -1,6 +1,7 @@
 var _ = require("lodash"),
 	difflet = require("difflet"),
 	console = require("console"),
+	async   = require("async"),
 	Animation = require("../lib/animation");
 
 var RED = 0xff0000,
@@ -84,22 +85,33 @@ function testValidConfig(config, cb) {
 	});
 }
 
-function testRenders(test, config, spec, cb) {
+function testRenders(test, config, spec, concludeCallback) {
 	testValidConfig(config, function (animation, timer) {
+		var tasks = [];
 		_.forEach(spec, function (item) {
-			if (item.time !== undefined) timer.elapsed = item.time;
-			dataEqual(test,
-				animation.render(),
-				item.expect,
-				item.msg
-			);
+			tasks.push(function (taskCallback) {
+				if (item.time !== undefined) timer.elapsed = item.time;
+				animation.render(function (err, result) {
+					if (err !== null) {
+						console.info("animation.render() threw an error: " + err);
+					}
+					dataEqual(test,
+						result,
+						item.expect,
+						item.msg
+					);
+					taskCallback();
+				});
+			});
 		});
-		if (cb !== undefined) {
-			cb();
-		}
-		else {
-			test.done();
-		}
+		async.parallel(tasks, function () {
+			if (concludeCallback !== undefined) {
+				concludeCallback();
+			}
+			else {
+				test.done();
+			}
+		});
 	});
 }
 

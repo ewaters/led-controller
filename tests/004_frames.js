@@ -64,24 +64,23 @@ _.forEach(tests, function (criteriaFunc, label) {
 			test.equal(err, null);
 			if (err !== null) return;
 
-			var result = animation.render();
-
-			if (criteria.expected !== undefined) {
-				var expected = _.flatten(criteria.expected),
-					got      = result[ config.strands[0].id ];
-				for (var i = 0; i <= expected.length; i++) {
-					if (expected[i] === SKIP) {
-						got[i] = expected[i] = null;
+			animation.render(function (err, result) {
+				if (criteria.expected !== undefined) {
+					var expected = _.flatten(criteria.expected),
+						got      = result[ config.strands[0].id ];
+					for (var i = 0; i <= expected.length; i++) {
+						if (expected[i] === SKIP) {
+							got[i] = expected[i] = null;
+						}
 					}
+					var expectedStr = JSON.stringify(expected),
+						gotStr      = JSON.stringify(got);
+					//if (expectedStr !== gotStr)
+						//console.info("Got: " + gotStr + ", expected: " + expectedStr);
+					test.equal(gotStr, expectedStr);
 				}
-				var expectedStr = JSON.stringify(expected),
-					gotStr      = JSON.stringify(got);
-				//if (expectedStr !== gotStr)
-					//console.info("Got: " + gotStr + ", expected: " + expectedStr);
-				test.equal(gotStr, expectedStr);
-			}
-
-			test.done();
+				test.done();
+			});
 		});
 	};
 });
