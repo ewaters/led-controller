@@ -252,12 +252,12 @@ exports.selection = function (test) {
 	];
 	payload.selections = [{
 		id: 1,
-		criteria: "pixelIndex % 2 == 0",
+		criteria: "(x + (y * maxX)) % 2 == 0",
 	}];
 	payload.playback[0].selectionId = 1;
 
 	testRenders(test, payload, [
-		{ expect: { 1: [ RED, null, RED, null ] } },
+		{ expect: { 1: [ RED, null, null, RED ] } },
 	]);
 };
 
@@ -283,7 +283,7 @@ exports.concurrentPlayback = function (test) {
 	});
 	payload.selections = [{
 		id: 1,
-		criteria: "pixelIndex % 2 == 0",
+		criteria: "(x + (y * maxX)) % 2 == 0",
 	}];
 	payload.playback.push({
 		id: 2,
@@ -294,8 +294,8 @@ exports.concurrentPlayback = function (test) {
 	});
 
 	testRenders(test, payload, [
-		{ expect: { 1: [ GREEN, RED, GREEN, RED ] } },
-		{ expect: { 1: [ BLUE, RED, BLUE, RED ] } },
-		{ expect: { 1: [ GREEN, RED, GREEN, RED ] } },
+		{ expect: { 1: [ GREEN, RED, RED, GREEN ] } },
+		{ expect: { 1: [ BLUE, RED, RED, BLUE ] } },
+		{ expect: { 1: [ GREEN, RED, RED, GREEN ] } },
 	]);
 };
