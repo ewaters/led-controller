@@ -13,6 +13,7 @@
 		"async": "*",
 		"eventsource": "*",
 		"express": "*",
+		"connect": "*",
 		"uuid": "*",
 		"supertest": "*",
 		"redis": "*",
