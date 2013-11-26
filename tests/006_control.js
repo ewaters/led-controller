@@ -1,10 +1,7 @@
-var _ = require("lodash"),
-	async = require("async"),
+var async = require("async"),
 	Playback = require("../lib/playback"),
 	clientio = require("socket.io-client"),
 	request = require("supertest");
-
-var port = 8080;
 
 var RED = 0xff0000;
 
@@ -36,11 +33,9 @@ var baseConfig = {
 };
 
 exports.basic = function (test) {
-	var app = new Playback();
-	app.listen(0);
-	var port = app.address().port;
-	var appBaseUrl = "http://127.0.0.1:" + port;
-	console.info("Using " + appBaseUrl);
+	var playback = new Playback();
+	playback.server.listen(0);
+	var appBaseUrl = "http://127.0.0.1:" + playback.server.address().port;
 
 	var client, clientDisplayCalls = [];
 
@@ -49,9 +44,8 @@ exports.basic = function (test) {
 			client = clientio
 				.connect(appBaseUrl)
 				.on("connect", function () {
-					console.info("client connected; setting alias");
 					client.emit("alias", "default");
-					cb();
+					async.nextTick(cb);
 				})
 				.on("error", function (err) {
 					test.ok(false, "Client received error: " + err);
@@ -60,7 +54,6 @@ exports.basic = function (test) {
 					test.ok(false, "Client disconnected unexpectedly");
 				})
 				.on("display", function (data) {
-					console.info("client display: ", data);
 					clientDisplayCalls.push(data);
 					client.emit("ready");
 				});
@@ -76,16 +69,13 @@ exports.basic = function (test) {
 				.expect(200, cb);
 		},
 		function (res, cb) {
-			console.info("Playback completed");
 			test.equal(clientDisplayCalls.length, 1);
 			test.deepEqual(clientDisplayCalls[0], { 1: [ 0xff0000, 0xff0000, 0xff0000, 0xff0000 ] });
+
+			// Close the client and server.
 			client.removeAllListeners("disconnect");
 			client.disconnect();
-			app.close(cb);
-		},
-		function (cb) {
-			console.info("app closed");
-			cb();
+			playback.close(cb);
 		},
 	], function (err) {
 		if (err !== undefined) {

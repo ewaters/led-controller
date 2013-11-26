@@ -1,6 +1,4 @@
 var _ = require("lodash"),
-	difflet = require("difflet"),
-	console = require("console"),
 	async   = require("async"),
 	Animation = require("../lib/animation");
 
@@ -68,7 +66,7 @@ function installTestTimer (animation) {
 function dataEqual(test, got, expected, message) {
 	if (got instanceof Error)
 		console.info(got.message);
-	var differs = JSON.stringify(got) != JSON.stringify(expected);
+	var differs = JSON.stringify(got) !== JSON.stringify(expected);
 	if (differs)
 		console.info("got: " + JSON.stringify(got) + ", expected: " + JSON.stringify(expected));
 	test.ok(! differs, message);

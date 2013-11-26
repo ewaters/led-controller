@@ -27,5 +27,19 @@
 	},
 	"scripts": {
 		"test": "nodeunit tests/0*.js"
+	},
+	"jshintConfig": {
+		"eqeqeq": true,
+		"forin": true,
+		"freeze": true,
+		"immed": true,
+		"latedef": true,
+		"nonew": true,
+		"undef": true,
+		"unused": true,
+		"strict": false,
+		"node": true,
+		"globals": {
+		}
 	}
 }

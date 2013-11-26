@@ -1,5 +1,4 @@
-var _ = require("lodash"),
-	Color = require("../lib/color");
+var Color = require("../lib/color");
 
 exports.invalid = function (test) {
 	test.ok(new Color('RGB', "notacolor") instanceof Error);

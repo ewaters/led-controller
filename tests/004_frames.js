@@ -3,7 +3,6 @@ var _ = require("lodash"),
 
 var RED = 0xff0000,
 	GREEN = 0x00ff00,
-	BLUE = 0x0000ff,
 	SKIP = "__skip__";
 
 var baseConfig = {

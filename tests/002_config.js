@@ -40,7 +40,7 @@ var baseConfig = {
 };
 
 var invalidConfigs = {
-	strandStartEnd: function (bad, good) {
+	strandStartEnd: function (bad) {
 		bad.strands.push({
 			id: 2,
 			start: 10,
@@ -101,7 +101,7 @@ var invalidConfigs = {
 		});
 		return "layouts[1].pixelIndicies.length 3 doesn't match expected 2";
 	},
-	layoutPixelIndiciesMismatch: function (bad, good) {
+	layoutPixelIndiciesMismatch: function (bad) {
 		bad.layouts.push({
 			id: 2,
 			dimensions: [ 2 ],
@@ -109,7 +109,7 @@ var invalidConfigs = {
 		});
 		return "layouts[1].pixelIndicies[1] references an unknown pixel id (4)";
 	},
-	layoutPixelIndiciesString: function (bad, good) {
+	layoutPixelIndiciesString: function (bad) {
 		bad.layouts.push({
 			id: 2,
 			dimensions: [ 2 ],
@@ -117,7 +117,7 @@ var invalidConfigs = {
 		});
 		return "layouts[1].pixelIndicies[0] is not a number ('not')";
 	},
-	layoutPixelIndiciesRepeated: function (bad, good) {
+	layoutPixelIndiciesRepeated: function (bad) {
 		bad.layouts.push({
 			id: 2,
 			dimensions: [ 2 ],
@@ -125,7 +125,7 @@ var invalidConfigs = {
 		});
 		return "layouts[1].pixelIndicies[1] references an already seen pixel id (1)";
 	},
-	layoutPixelIndiciesNotArray: function (bad, good) {
+	layoutPixelIndiciesNotArray: function (bad) {
 		bad.layouts.push({
 			id: 2,
 			dimensions: [ 2, 2 ],
@@ -146,7 +146,7 @@ var invalidConfigs = {
 		});
 		return "Missing required property: id (/properties/playback/items/required/0)";
 	},
-	playbackMismatch: function (bad, good) {
+	playbackMismatch: function (bad) {
 		bad.playback.push({
 			id: 2,
 			animationId: 4,
@@ -155,13 +155,13 @@ var invalidConfigs = {
 		return "playback[1].animationId refers to an id 4 that's not found in animations";
 	},
 
-	frameFields: function (bad, good) {
+	frameFields: function (bad) {
 		bad.animations[0].frames.push({
 			iAmAnInvalidFrame: true
 		});
 		return "Data does not match any schemas from \"oneOf\" (/properties/animations/items/properties/frames/items/oneOf)";
 	},
-	frameTransitionPrevNext: function (bad, good) {
+	frameTransitionPrevNext: function (bad) {
 		bad.animations[0].frames = [{
 			dissolve: true,
 			time: 5,
@@ -184,7 +184,7 @@ var validConfigs = {
 };
 
 var configsWithDefaults = {
-	animation: function (config) {
+	animation: function () {
 		return function (test, obj) {
 			var animation = obj.config.animationsById[1];
 			test.equal(animation.colorspace, "RGB");
