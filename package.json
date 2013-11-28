@@ -16,9 +16,11 @@
 		"connect": "*",
 		"uuid": "*",
 		"supertest": "*",
+		"ppm": "*",
 		"redis": "*",
 		"socket.io": "*",
 		"socket.io-client": "*",
+		"temporary": "*",
 		"exprjs": "*"
 	},
 	"devDependencies": {

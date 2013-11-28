@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+var Playback = require('../lib/playback');
+
+var port = 8080;
+
+var playback = new Playback();
+
+playback.server.listen(port);
+
+console.info("Server listening on " + port);
