@@ -75,8 +75,8 @@ function dataEqual(test, got, expected, message) {
 function testValidConfig(config, cb) {
 	var animation = new Animation(config);
 	animation.compile(function (err) {
-		if (err !== null) {
-			console.info(err);
+		if (err !== undefined && err !== null) {
+			console.info("animation.compile() failed:", err);
 			return;
 		}
 		cb(animation, installTestTimer(animation));

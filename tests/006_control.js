@@ -80,7 +80,7 @@ exports.basic = function (test) {
 	], function (err) {
 		if (err !== undefined) {
 			test.ok(! err, "No error occurred during the waterfall");
-			console.info("waterfall error: " + err);
+			console.info("waterfall error:", err);
 		}
 		test.done();
 	});
