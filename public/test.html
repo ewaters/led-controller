@@ -29,6 +29,13 @@ var spec = {
 					fill: 0x00ff00,
 					time: 1,
 				},
+				{
+					gradient: [
+						{ yPercent: 0, color: 0xff0000 },
+						{ yPercent: 1, color: 0x00ff00 },
+					],
+					time: 5,
+				},
 			]
 		}],
 		playback: [{
@@ -49,7 +56,7 @@ superagent
 		console.info(res);
 
 		var img = new Image();
-		img.src = 'data:image/gif;base64,' + base64.encode(res.text);
+		img.src = res.body.uri;
 		document.body.appendChild(img);
 	});
 </script>
