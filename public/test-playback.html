@@ -1,0 +1,79 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="/superagent.js"></script>
+<script>
+
+var spec = {
+	target: "browser",
+	waitUntilComplete: true,
+	config: {
+		strands: [{
+			id: 1,
+			start: 0,
+			end: 49,
+		}],
+		layouts: [{
+			id: 1,
+			dimensions: [ 5, 10 ],
+		}],
+		animations: [{
+			id: 1,
+			frames: [
+				{
+					fill: 0xff0000,
+					time: 1,
+				},
+				{
+					dissolve: true,
+					time: 1,
+				},
+				{
+					fill: 0x00ff00,
+					time: 1,
+				},
+				{
+					gradient: [
+						{ yPercent: 0, color: 0xff0000 },
+						{ yPercent: 1, color: 0x00ff00 },
+					],
+					time: 1,
+				},
+			]
+		}],
+		playback: [{
+			id: 1,
+			animationId: 1,
+			layoutId: 1,
+		}],
+	}
+};
+
+function playback () {
+	superagent
+		.post("/api/playback")
+		.send(spec)
+		.end(function (err, res) {
+			if (err) {
+				console.error(err);
+			}
+			else {
+				console.info(res.text);
+			}
+		});
+}
+
+var socket = io.connect('http://192.168.0.192:8080')
+socket.on("connect", function () {
+	socket.emit("alias", "browser");
+});
+socket.on("error", function (err) {
+	console.info("Got error:", err);
+});
+socket.on("disconnect", function () {
+	console.error("Socket disconnected");
+});
+socket.on("display", function (data) {
+	console.info("display", data);
+	setTimeout(function () { socket.emit("ready") }, 500);
+});
+
+</script>
