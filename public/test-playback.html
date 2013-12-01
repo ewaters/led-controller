@@ -4,7 +4,7 @@
 
 var spec = {
 	target: "default",
-	waitUntilComplete: true,
+	waitUntilComplete: false,
 	config: {
 		strands: [{
 			id: 1,
@@ -67,19 +67,21 @@ function playback (target) {
 		});
 }
 
-var socket = io.connect('http://192.168.0.192:8080')
-socket.on("connect", function () {
-	socket.emit("alias", "browser");
-});
-socket.on("error", function (err) {
-	console.info("Got error:", err);
-});
-socket.on("disconnect", function () {
-	console.error("Socket disconnected");
-});
-socket.on("display", function (data) {
-	console.info("display", data);
-	setTimeout(function () { socket.emit("ready") }, 500);
-});
+if (spec.target === "browser") {
+	var socket = io.connect('http://192.168.0.192:8080')
+	socket.on("connect", function () {
+		socket.emit("alias", "browser");
+	});
+	socket.on("error", function (err) {
+		console.info("Got error:", err);
+	});
+	socket.on("disconnect", function () {
+		console.error("Socket disconnected");
+	});
+	socket.on("display", function (data) {
+		console.info("display", data);
+		setTimeout(function () { socket.emit("ready") }, 500);
+	});
+}
 </script>
 <button onclick="playback()">Playback</button>
