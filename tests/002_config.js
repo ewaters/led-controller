@@ -181,6 +181,9 @@ var validConfigs = {
 			],
 		});
 	},
+	blackPixels: function (config) {
+		config.animations[0].frames[0].fill = 0;
+	},
 };
 
 var configsWithDefaults = {

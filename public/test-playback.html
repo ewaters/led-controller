@@ -2,8 +2,10 @@
 <script src="/superagent.js"></script>
 <script>
 
+var target = "default";
+
 var spec = {
-	target: "default",
+	target: target,
 	waitUntilComplete: false,
 	config: {
 		strands: [{
@@ -53,7 +55,37 @@ var spec = {
 	}
 };
 
-function playback (target) {
+var turnOffSpec = {
+	target: target,
+	waitUntilComplete: false,
+	config: {
+		strands: [{
+			id: 1,
+			start: 0,
+			end: 49,
+		}],
+		layouts: [{
+			id: 1,
+			dimensions: [ 5, 10 ],
+		}],
+		animations: [{
+			id: 1,
+			frames: [
+				{
+					fill: 0x000000,
+				},
+			]
+		}],
+		playback: [{
+			id: 1,
+			animationId: 1,
+			layoutId: 1,
+			repeat: -1,
+		}],
+	}
+};
+
+function playback (spec) {
 	superagent
 		.post("/api/playback")
 		.send(spec)
@@ -84,4 +116,5 @@ if (spec.target === "browser") {
 	});
 }
 </script>
-<button onclick="playback()">Playback</button>
+<button onclick="playback(spec)">Playback</button><br>
+<button onclick="playback(turnOffSpec)">Turn off</button>

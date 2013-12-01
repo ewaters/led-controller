@@ -45,6 +45,7 @@ exports.basic = function (test) {
 				.connect(appBaseUrl)
 				.on("connect", function () {
 					client.emit("alias", "default");
+					client.emit("ready");
 					async.nextTick(cb);
 				})
 				.on("error", function (err) {
