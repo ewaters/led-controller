@@ -11,6 +11,7 @@ uint16_t currentPixelIndex = 0;
 uint32_t currentColor;
 uint8_t  currentChannel = 1;
 byte     gReady = 0xff;
+byte     gInit  = 0xfe;
 
 void setup() {
 	Serial.begin(57600);
@@ -20,7 +21,7 @@ void setup() {
 
         colorWipe(Color(255, 0, 0), 20);
         colorWipe(Color(0, 0, 0), 20);
-        Serial.write(gReady);
+        Serial.write(gInit);
 }
 
 void loop() {

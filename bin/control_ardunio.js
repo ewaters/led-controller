@@ -16,6 +16,7 @@ var playbackServer = "http://192.168.0.192:8080",
 var serialPort,
 	playbackClient,
 	READY = 0xff;
+	INIT_READY = 0xfe;
 
 async.series([
 	function (cb) {
@@ -39,8 +40,22 @@ async.series([
 		});
 		playbackClient.emit("alias", alias);
 
+		var initialReady = false;
+
 		// Setup serial port.
 		serialPort.on("data", function (data) {
+			if (! initialReady) {
+				if (data[0] === INIT_READY) {
+					initialReady = true;
+					playbackClient.emit("ready");
+					console.info("serialPort reports ready for display");
+				}
+				else {
+					console.error("serialPort received unknown data when waiting for initial ready:", data);
+				}
+				return;
+			}
+
 			if (data[0] !== READY) {
 				console.error("serialPort received unknown data:", data);
 				process.exit(1);
