@@ -3,7 +3,7 @@
 <script>
 
 var spec = {
-	target: "browser",
+	target: "default",
 	waitUntilComplete: true,
 	config: {
 		strands: [{
@@ -20,22 +20,27 @@ var spec = {
 			frames: [
 				{
 					fill: 0xff0000,
-					time: 1,
 				},
 				{
 					dissolve: true,
-					time: 1,
+					time: 2,
 				},
 				{
 					fill: 0x00ff00,
-					time: 1,
 				},
 				{
-					gradient: [
-						{ yPercent: 0, color: 0xff0000 },
-						{ yPercent: 1, color: 0x00ff00 },
-					],
-					time: 1,
+					dissolve: true,
+					time: 2,
+				},
+				{
+					fill: 0x0000ff,
+				},
+				{
+					dissolve: true,
+					time: 2,
+				},
+				{
+					fill: 0xff0000,
 				},
 			]
 		}],
@@ -43,12 +48,12 @@ var spec = {
 			id: 1,
 			animationId: 1,
 			layoutId: 1,
+			repeat: -1,
 		}],
 	}
 };
 
 function playback (target) {
-	spec.target = target ? target : "browser";
 	superagent
 		.post("/api/playback")
 		.send(spec)
@@ -76,5 +81,5 @@ socket.on("display", function (data) {
 	console.info("display", data);
 	setTimeout(function () { socket.emit("ready") }, 500);
 });
-
 </script>
+<button onclick="playback()">Playback</button>
