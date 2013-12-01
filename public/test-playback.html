@@ -47,7 +47,8 @@ var spec = {
 	}
 };
 
-function playback () {
+function playback (target) {
+	spec.target = target ? target : "browser";
 	superagent
 		.post("/api/playback")
 		.send(spec)
