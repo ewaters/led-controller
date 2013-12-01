@@ -21,6 +21,7 @@
 		"socket.io": "*",
 		"socket.io-client": "*",
 		"temporary": "*",
+		"serialport": "*",
 		"exprjs": "*"
 	},
 	"devDependencies": {
